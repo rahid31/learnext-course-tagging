@@ -22,12 +22,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------- Authentication --------------------
-@st.cache_resource
-def load_credentials():
-    with open("credentials.pkl", "rb") as f:
-        return pickle.load(f)
+# @st.cache_resource
+# def load_credentials():
+#     with open("credentials.pkl", "rb") as f:
+#         return pickle.load(f)
 
-# Build credentials dict from st.secrets
 credentials = {
     "usernames": {}
 }
@@ -45,7 +44,6 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=7
 )
 
-# Initialize session states
 if "auth_status" not in st.session_state:
     st.session_state.auth_status = None
 
@@ -54,7 +52,7 @@ with placeholder.container():
     if st.session_state.auth_status is None:
         st.image(company_logo, width=192)
 
-    name, auth_status, username = authenticator.login("Login", "main")
+    name, auth_status, username = authenticator.login("Login", location="main")
     st.session_state.auth_status = auth_status
 
 # -------------------- Main App --------------------
