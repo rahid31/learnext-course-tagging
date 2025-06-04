@@ -22,11 +22,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------- Authentication --------------------
-# @st.cache_resource
-# def load_credentials():
-#     with open("credentials.pkl", "rb") as f:
-#         return pickle.load(f)
-
 credentials = {
     "usernames": {}
 }
@@ -47,13 +42,16 @@ authenticator = stauth.Authenticate(
 if "auth_status" not in st.session_state:
     st.session_state.auth_status = None
 
+# Placeholder for showing logo
 placeholder = st.empty()
-with placeholder.container():
-    if st.session_state.auth_status is None:
+
+if st.session_state.auth_status is None:
+    with placeholder.container():
         st.image(company_logo, width=192)
 
-    name, auth_status, username = authenticator.login("Login", location="main")
-    st.session_state.auth_status = auth_status
+# Show login widget outside of placeholder container
+name, auth_status, username = authenticator.login("Login", location="main")
+st.session_state.auth_status = auth_status
 
 # -------------------- Main App --------------------
 if st.session_state.auth_status:

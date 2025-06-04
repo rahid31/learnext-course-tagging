@@ -12,3 +12,6 @@
 generate_keys.py
 
 credentials.pkl
+.toml
+
+.streamlit
