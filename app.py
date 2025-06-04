@@ -27,7 +27,16 @@ def load_credentials():
     with open("credentials.pkl", "rb") as f:
         return pickle.load(f)
 
-credentials = load_credentials()
+# Build credentials dict from st.secrets
+credentials = {
+    "usernames": {}
+}
+
+for username, info in st.secrets["credentials"].items():
+    credentials["usernames"][username] = {
+        "name": info["name"],
+        "password": info["password"]
+    }
 
 authenticator = stauth.Authenticate(
     credentials,
