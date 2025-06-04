@@ -52,6 +52,17 @@ with placeholder.container():
 if st.session_state.auth_status:
     placeholder.empty()
 
+    #Hide Toolbar & footer
+    st.markdown("""
+        <style>
+        header { visibility: hidden; }
+        footer { visibility: hidden; }
+        .st-emotion-cache-z5fcl4 { display: none; }  /* Hides Streamlit toolbar */
+        .viewerBadge_container__1QSob {display: none !important;} /* Hides 'Created by' and 'Hosted by' */
+        .stDeployButton {display: none !important;} /* Hides deploy/share button */
+        </style>
+    """, unsafe_allow_html=True)
+
     st.sidebar.success(f"Logged in as {name}")
     authenticator.logout("Logout", "sidebar")
 
