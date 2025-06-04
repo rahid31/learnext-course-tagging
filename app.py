@@ -50,7 +50,7 @@ if st.session_state.auth_status is None:
         st.image(company_logo, width=192)
 
 # Show login widget outside of placeholder container
-name, auth_status, username = authenticator.login("Login")
+name, auth_status, username = authenticator.login(form_name="Login", location="main")
 st.session_state.auth_status = auth_status
 
 # -------------------- Main App --------------------
