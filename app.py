@@ -53,20 +53,40 @@ if st.session_state.auth_status is None:
 name, auth_status, username = authenticator.login(form_name="Login", location="main")
 st.session_state.auth_status = auth_status
 
-# -------------------- Main App --------------------
-if st.session_state.auth_status:
-    placeholder.empty()
+# ----------------- Hide Toolbar & Footer -----------------
+st.markdown("""
+    <style>
+    header { visibility: hidden; }
+    footer { visibility: hidden; }
+    .st-emotion-cache-z5fcl4 { display: none; }
+    .viewerBadge_container__1QSob {display: none !important;}
+    .stDeployButton {display: none !important;}
+    </style>
+""", unsafe_allow_html=True)
 
-    #Hide Toolbar & footer
-    st.markdown("""
-        <style>
-        header { visibility: hidden; }
-        footer { visibility: hidden; }
-        .st-emotion-cache-z5fcl4 { display: none; }  /* Hides Streamlit toolbar */
-        .viewerBadge_container__1QSob {display: none !important;} /* Hides 'Created by' and 'Hosted by' */
-        .stDeployButton {display: none !important;} /* Hides deploy/share button */
-        </style>
-    """, unsafe_allow_html=True)
+# ----------------- Load Models (cached) -----------------
+@st.cache_resource
+def get_classifier_a():
+    return TagClassifier()
+
+@st.cache_resource
+def get_classifier_b():
+    return OtherClassifier()
+
+@st.cache_resource
+def get_classifier_c():
+    return BulkTagging()
+
+classifierA = get_classifier_a()
+classifierB = get_classifier_b()
+classifierC = get_classifier_c()
+
+# ----------------- MAIN APP -----------------
+if st.session_state.auth_status:
+    # Clear placeholder (if any)
+    if 'placeholder' in st.session_state:
+        st.session_state.placeholder.empty()
+        del st.session_state['placeholder']
 
     st.sidebar.success(f"Logged in as {name}")
     authenticator.logout("Logout", "sidebar")
@@ -74,50 +94,29 @@ if st.session_state.auth_status:
     st.title("Learnext Course Tagging")
     st.warning("Tag suggestions consume OpenAI API tokens. Please use them efficiently.")
 
-    # -------------------- Load Models --------------------
-    @st.cache_resource
-    def get_classifier_a():
-        return TagClassifier()
-
-    @st.cache_resource
-    def get_classifier_b():
-        return OtherClassifier()
-    
-    @st.cache_resource
-    def get_classifier_c():
-        return BulkTagging()
-
-    classifierA = get_classifier_a()
-    classifierB = get_classifier_b()
-    classifierC = get_classifier_c()
-
-    # -------------------- Course Inputs --------------------
+    # ------------- Course Inputs -------------
     st.markdown("#### Single Course Input")
-    st.session_state.course_name = st.text_input("Course Name", value=st.session_state.get("course_name", ""))
-    st.session_state.description = st.text_area("Description", value=st.session_state.get("description", ""))
+    course_name = st.text_input("Course Name", value=st.session_state.get("course_name", ""))
+    description = st.text_area("Description", value=st.session_state.get("description", ""))
+
+    # Save inputs to session state
+    st.session_state.course_name = course_name
+    st.session_state.description = description
 
     col1, col2 = st.columns(2)
     tag_clicked = col1.button("Tag Suggestions")
     other_clicked = col2.button("Other Suggestions")
 
-    if tag_clicked:
-        if not st.session_state.course_name.strip() or not st.session_state.description.strip():
+    if tag_clicked or other_clicked:
+        if not course_name.strip() or not description.strip():
             st.error("Please fill in both the course name and description.")
         else:
             with st.spinner("Analyzing course content..."):
-                tags = classifierA.classify(st.session_state.course_name, st.session_state.description)
-            st.subheader("Suggested Tags")
-            if tags:
-                st.markdown("\n".join(f"- **{tag}**" for tag in tags))
-            else:
-                st.info("No relevant tags were identified.")
+                if tag_clicked:
+                    tags = classifierA.classify(course_name, description)
+                else:
+                    tags = classifierB.classify(course_name, description)
 
-    if other_clicked:
-        if not st.session_state.course_name.strip() or not st.session_state.description.strip():
-            st.error("Please fill in both the course name and description.")
-        else:
-            with st.spinner("Analyzing course content..."):
-                tags = classifierB.classify(st.session_state.course_name, st.session_state.description)
             st.subheader("Suggested Tags")
             if tags:
                 st.markdown("\n".join(f"- **{tag}**" for tag in tags))
