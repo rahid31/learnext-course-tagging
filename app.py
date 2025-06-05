@@ -7,7 +7,6 @@ st.set_page_config(page_title="Learnext Tagging", page_icon=page_icon, layout="c
 import pandas as pd
 import io
 import streamlit_authenticator as stauth
-import pickle
 from course_tagging import TagClassifier, OtherClassifier, BulkTagging
 
 
@@ -50,7 +49,7 @@ if st.session_state.auth_status is None:
         st.image(company_logo, width=192)
 
 # Show login widget outside of placeholder container
-name, auth_status, username = authenticator.login(form_name="Login", location="main")
+name, auth_status, username = authenticator.login("Login", location="main")
 st.session_state.auth_status = auth_status
 
 # ----------------- Hide Toolbar & Footer -----------------
